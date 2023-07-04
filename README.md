@@ -5,7 +5,7 @@
 Адрес репозитория: (https://github.com/vecoweb22/movies-explorer-api)
 
 ## Ссылки на проект
-- IP 51.250.92.162
+- IP 130.193.50.226
 - Backend (https://api.vecowebmovies.nomoreparties.sbs)
 
 ## Ссылка на макет
