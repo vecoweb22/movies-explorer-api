@@ -1,6 +1,6 @@
 const allowedCorsOrigins = [
-  // 'https://api.vecowebmovies.nomoreparties.sbs',
-  // 'http://api.vecowebmovies.nomoreparties.sbs',
+  'https://api.vecowebmovies.nomoreparties.sbs',
+  'http://api.vecowebmovies.nomoreparties.sbs',
   'localhost:3000',
   'http://localhost',
   'http://localhost:3001',
