@@ -1,19 +1,18 @@
 const Movie = require('../models/movie');
 const ForbiddenError = require('../errors/ForbiddenError');
 const NotFoundError = require('../errors/NotFoundError');
-const BadRequestError = require('../errors/BadRequestError');
+
 const {
   MOVIE_ERROR,
-  BAD_REQUEST,
   DELETE_MOVIE_ERROR,
 } = require('../utils/constants');
 
 module.exports.getAllMovies = (req, res, next) => {
-  const currUserId = req.user._id;
+  const owner = req.user._id;
 
-  Movie.find({ owner: currUserId })
-    .then((movies) => {
-      res.send(movies);
+  Movie.find({ owner })
+    .then((result) => {
+      res.send(result);
     })
     .catch(() => {
       throw new NotFoundError(MOVIE_ERROR);
@@ -22,32 +21,56 @@ module.exports.getAllMovies = (req, res, next) => {
 };
 
 module.exports.createMovie = (req, res, next) => {
-  Movie.create({ ...req.body, owner: req.user._id })
-    .then((movie) => res.status(201).send(movie))
+  const {
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailerLink,
+    thumbnail,
+    movieId,
+    nameRU,
+    nameEN,
+  } = req.body;
+
+  const movieOwner = req.user;
+
+  Movie.create({
+    country,
+    director,
+    duration,
+    year,
+    description,
+    image,
+    trailerLink,
+    thumbnail,
+    owner: movieOwner,
+    movieId,
+    nameRU,
+    nameEN,
+  })
+    .then((movie) => {
+      movie
+        .populate('owner')
+        .then((movieInfo) => res.status(201).send(movieInfo))
+        .catch(next);
+    })
     .catch(next);
 };
 
 module.exports.deleteMovie = (req, res, next) => {
-  const currUserId = req.user._id;
-
-  Movie.findById(req.params._id)
-    .orFail()
+  Movie.findById(req.params.movieId)
+    .orFail(() => next(new NotFoundError(MOVIE_ERROR)))
     .then((movie) => {
-      const ownerId = movie.owner.toString();
-      if (ownerId !== currUserId) {
+      if (req.user._id !== movie.owner.toString()) {
         throw new ForbiddenError(DELETE_MOVIE_ERROR);
       }
-      return movie;
+      movie
+        .deleteOne()
+        .then(() => res.send(movie))
+        .catch(next);
     })
-    .then((movie) => movie.deleteOne())
-    .then((movie) => res.status(200).send(movie))
-    .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return next(new NotFoundError(MOVIE_ERROR));
-      }
-      if (err.name === 'CastError') {
-        return next(new BadRequestError(BAD_REQUEST));
-      }
-      return next(err);
-    });
+    .catch(next);
 };

@@ -7,7 +7,3 @@
 ## Ссылки на проект
 - IP 130.193.50.226
 - Backend (https://api.vecowebmovies.nomoreparties.sbs)
-
-## Ссылка на макет
-- zip (https://disk.yandex.ru/d/WwP8pXIfz_mATA) 
-- rar (https://disk.yandex.ru/d/K_9A8tDjMuUVkQ)

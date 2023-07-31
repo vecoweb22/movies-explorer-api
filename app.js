@@ -8,7 +8,7 @@ const { corsOptions } = require('./middlewares/corsWare');
 const { limiter } = require('./middlewares/rateLimit');
 
 const app = express();
-const { routers } = require('./routes');
+const { routers } = require('./routes/index');
 
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const defaultError = require('./middlewares/defaultError');
