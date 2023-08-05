@@ -3,16 +3,14 @@ const bcrypt = require('bcryptjs');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-
 const { secretKey } = require('../utils/config');
 const BadRequestError = require('../errors/BadRequestError');
 const RegisterError = require('../errors/RegisterError');
-const AuthorizationError = require('../errors/AuthorizationError');
+
 const {
   BAD_REQUEST,
   EMAIL_ERROR,
   LOGOUT_SUCCESS,
-  AUTHORIZATION_ERROR,
 } = require('../utils/constants');
 
 module.exports.createUser = (req, res, next) => {
@@ -42,34 +40,18 @@ module.exports.createUser = (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  User.findOne({ email }).select('+password')
+  return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        return next(new AuthorizationError(AUTHORIZATION_ERROR));
-      }
-
-      return bcrypt.compare(password, user.password)
-        .then((matched) => {
-          if (!matched) {
-            return next(new AuthorizationError(AUTHORIZATION_ERROR));
-          }
-
-          const token = jwt.sign(
-            { _id: user._id },
-            secretKey,
-            { expiresIn: '7d' },
-          );
-
-          res.cookie('jwt', token, {
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            httpOnly: true,
-            saneSite: true,
-          });
-
-          return res.send(user.toJSON({ useProjection: true }));
-        });
+      const token = jwt.sign({ _id: user.id }, secretKey, { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000 * 24 * 7,
+          sameSite: 'none',
+          httpOnly: true,
+          secure: true,
+        })
+        .send({ token });
     })
-
     .catch(next);
 };
 
