@@ -7,11 +7,11 @@ const { EMAIL_PASSWORD_ERROR } = require('../utils/constants');
 const userSchema = new mongoose.Schema({
   email: {
     type: String,
-    required: true,
     validate: {
       validator: (email) => validator.isEmail(email),
       message: 'Некорректная электронная почта',
     },
+    required: true,
     unique: true,
   },
   password: {
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     maxlength: 30,
     required: true,
   },
-});
+}, { versionKey: false });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email })
